@@ -1,2 +1,35 @@
-node_modules
+# Dossiers et fichiers à exclure
+
+# Noeud modules (dépendances installées)
+node_modules/
+
+# Fichiers de configuration (peut varier en fonction de votre IDE/éditeur)
+.vscode/
+.idea/
+
+# Fichiers d'environnement sensibles contenant des clés d'API ou des secrets
 .env
+.env.local
+.env.*.local
+
+# Journalisation (fichiers journaux, fichiers de suivi, etc.)
+logs/
+*.log
+
+# Fichiers de sauvegarde
+*.bak
+*.backup
+*.swp
+*.swo
+
+# Fichiers de configuration de système
+.DS_Store
+Thumbs.db
+
+# Les fichiers suivants sont généralement ignorés, mais personnalisez-les selon vos besoins
+# package-lock.json
+# yarn.lock
+
+# Fichiers de sortie de compilation (par exemple, fichiers .js générés à partir de TypeScript)
+dist/
+out/
