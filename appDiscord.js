@@ -1,5 +1,3 @@
-//node discord-example-app-main/appDiscord.js
-
 import {
   ChatInputCommandInteraction,
   Client,
@@ -22,7 +20,6 @@ import {
 } from "discord-interactions";
 import { database } from "./Niveaux/MySQL.js";
 import fs from "node:fs";
-import { reload } from "./deploy-commands.js";
 
 const client = new Client({
   intents: [
@@ -33,6 +30,10 @@ const client = new Client({
 });
 
 client.commands = new Collection();
+const reloadCommand = new URL("deploy-commands.js", import.meta.url);
+await import(reloadCommand).then(async (command) => {
+  client.commands.set(command.data.name, command);
+});
 
 const commandsPath = new URL("commands/SlashCommands", import.meta.url);
 const commandFiles = fs
@@ -52,7 +53,6 @@ for (const file of commandFiles) {
     }
   });
 }
-client.commands.set(reload, reload());
 
 import mysql from "mysql";
 const db = mysql.createConnection({
@@ -83,12 +83,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   const command = interaction.client.commands.get(interaction.commandName);
   if (!command) {
+    console.log(interaction.commandName);
     console.error("[X] Pas de commande existante avec ce nom");
   }
 
   try {
     await command.execute(interaction);
   } catch (error) {
+    console.log(error);
     if (interaction.replied || interaction.deferred) {
       await interaction.followUp({
         content: "Il y a eu une erreur pendant le lancement de la commande",

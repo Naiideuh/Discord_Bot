@@ -2,11 +2,12 @@ import fs from "node:fs";
 import "dotenv/config";
 import { REST, Routes, SlashCommandBuilder } from "discord.js";
 
-const data = new SlashCommandBuilder()
+export const data = new SlashCommandBuilder()
   .setName("reload")
   .setDescription("Reload les commandes slashs");
 
-export async function reload() {
+export async function execute(interaction) {
+  interaction.reply({ content: "Reloading . . .", ephemeral: true });
   const commands = [];
   const foldersPath = new URL("commands", import.meta.url);
   const commandFolders = fs.readdirSync(foldersPath);
@@ -29,9 +30,8 @@ export async function reload() {
       });
     }
   }
-
+  console.log(commands);
   const rest = new REST().setToken(process.env.DISCORD_TOKEN);
-
   // and deploy your commands!
   (async () => {
     try {
