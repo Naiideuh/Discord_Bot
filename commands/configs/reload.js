@@ -22,22 +22,27 @@ export async function execute(interaction) {
     );
   }
 
-  delete require.cache[
-    require.resolve(`../${command.category}/${command.data.name}.js`)
-  ];
+  //delete require.cache[
+  //  require.resolve(`../${command.category}/${command.data.name}.js`)
+  //];
 
   try {
     interaction.client.commands.delete(command.data.name);
-    const newCommand = require(`../${command.category}/${command.data.name}.js`);
-    interaction.client.commands.set(newCommand.data.name, newCommand);
-    await interaction.reply(
-      `Command \`${newCommand.data.name}\` was reloaded!`
+    await import(`../${command.category}/${command.data.name}.js`).then(
+      async (newCommand) => {
+        interaction.client.commands.set(newCommand.data.name, newCommand);
+        await interaction.reply({
+          content: `[RELOAD] La commande \`${newCommand.data.name}\` a été rechargée`,
+          ephemeral: true,
+        });
+      }
     );
   } catch (error) {
     console.error(error);
-    await interaction.reply(
-      `There was an error while reloading a command \`${command.data.name}\`:\n\`${error.message}\``
-    );
+    await interaction.reply({
+      content: `[RELOAD] Il y a eu un problème avec le reload de \`${command.data.name}\`:\n\`${error.message}\``,
+      ephemeral: true,
+    });
   }
 }
 
