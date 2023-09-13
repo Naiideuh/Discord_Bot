@@ -25,5 +25,10 @@ export const data = new SlashCommandBuilder()
   );
 
 export async function execute(interaction) {
-  interaction.reply({ content: `Essai : ${interaction.options}` });
+  console.log(interaction.options._hoistedOptions.channel);
+  interaction.reply({
+    content: `Essai : ${interaction.options._hoistedOptions}`,
+  });
 }
+
+export const category = 'configs'

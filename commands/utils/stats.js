@@ -207,3 +207,5 @@ export async function execute(interaction) {
     //console.log("Graphe terminée")
   });
 }
+
+export const category = 'utils'

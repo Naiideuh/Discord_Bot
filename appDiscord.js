@@ -30,30 +30,31 @@ const client = new Client({
 });
 
 client.commands = new Collection();
-const reloadCommand = new URL("deploy-commands.js", import.meta.url);
-await import(reloadCommand).then(async (command) => {
-  client.commands.set(command.data.name, command);
-});
 
-const commandsPath = new URL("commands/SlashCommands", import.meta.url);
-const commandFiles = fs
-  .readdirSync(commandsPath)
-  .filter((file) => file.endsWith(".js"));
-for (const file of commandFiles) {
-  const filePath = new URL(`${commandsPath}/${file}`, import.meta.url);
-  await import(filePath).then(async (command) => {
-    // Set a new item in the Collection with the key as the command name and the value as the exported module
-    if ("data" in command && "execute" in command) {
-      client.commands.set(command.data.name, command);
-      console.log(`[REUSSI] Le fichier ${filePath} a bien été pris en compte`);
-    } else {
-      console.log(
-        `[WARNING] La commande ${filePath} manque d'un "data" ou d'un "execute"`
-      );
-    }
-  });
+const foldersPath = new URL("commands", import.meta.url);
+const commandFolders = fs.readdirSync(foldersPath);
+for (const folder of commandFolders) {
+  const commandsPath = new URL(`${foldersPath}/${folder}`, import.meta.url);
+  const commandFiles = fs
+    .readdirSync(commandsPath)
+    .filter((file) => file.endsWith(".js"));
+  for (const file of commandFiles) {
+    const filePath = new URL(`${commandsPath}/${file}`, import.meta.url);
+    await import(filePath).then(async (command) => {
+      // Set a new item in the Collection with the key as the command name and the value as the exported module
+      if ("data" in command && "execute" in command) {
+        client.commands.set(command.data.name, command);
+        console.log(
+          `[REUSSI] Le fichier ${filePath} a bien été pris en compte`
+        );
+      } else {
+        console.log(
+          `[WARNING] La commande ${filePath} manque d'un "data" ou d'un "execute"`
+        );
+      }
+    });
+  }
 }
-
 import mysql from "mysql";
 const db = mysql.createConnection({
   host: "localhost",
