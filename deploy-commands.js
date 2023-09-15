@@ -2,7 +2,7 @@ import fs from "node:fs";
 import "dotenv/config";
 import { REST, Routes, SlashCommandBuilder } from "discord.js";
 
-const developping = ["reload"];
+const developping = ["reload", "eval"];
 let commands = [];
 const foldersPath = new URL("commands", import.meta.url);
 const commandFolders = fs.readdirSync(foldersPath);
