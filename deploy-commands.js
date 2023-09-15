@@ -2,7 +2,8 @@ import fs from "node:fs";
 import "dotenv/config";
 import { REST, Routes, SlashCommandBuilder } from "discord.js";
 
-const commands = [];
+const developping = ["reload"];
+let commands = [];
 const foldersPath = new URL("commands", import.meta.url);
 const commandFolders = fs.readdirSync(foldersPath);
 for (const folder of commandFolders) {
@@ -28,10 +29,36 @@ for (const folder of commandFolders) {
 }
 const rest = new REST().setToken(process.env.DISCORD_TOKEN);
 // and deploy your commands!
-(async () => {
+
+await (async () => {
   try {
     console.log(
-      `Started refreshing ${commands.length} application (/) commands.`
+      `[REFRESH TESTGUILD] Le rafraichissement de  ${commands.length} application (/) a commencé.`
+    );
+    // The put method is used to fully refresh all commands in the guild with the current set
+    const data = await rest.put(
+      Routes.applicationGuildCommands(
+        process.env.APP_ID,
+        process.env.GUILD_TEST_ID
+      ),
+      { body: commands }
+    );
+
+    console.log(
+      `[REFRESH TESTGUILD] Le rafraichissement de ${data.length} applications a réussi.`
+    );
+  } catch (error) {
+    // And of course, make sure you catch and log any errors!
+    console.error(error);
+  }
+})();
+
+commands = commands.filter((element) => !developping.includes(element.name));
+
+await (async () => {
+  try {
+    console.log(
+      `[REFRESH ALL] Le rafraichissement de  ${commands.length} application (/) a commencé.`
     );
     // The put method is used to fully refresh all commands in the guild with the current set
     const data = await rest.put(
@@ -40,7 +67,7 @@ const rest = new REST().setToken(process.env.DISCORD_TOKEN);
     );
 
     console.log(
-      `Successfully reloaded ${data.length} application (/) commands.`
+      `[REFRESH ALL] Le rafraichissement de ${data.length} a réussi.`
     );
   } catch (error) {
     // And of course, make sure you catch and log any errors!
