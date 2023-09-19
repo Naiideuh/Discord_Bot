@@ -69,17 +69,7 @@ client.on("ready", () => {
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
-// client.on('interactionCreate', async (interaction) => {
-// 	if (!interaction.isChatInputCommand()) return;
-
-// 	if (interaction.commandName === 'ping') {
-// 		await interaction.reply('Pong!');
-// 	}
-// });
-
-//Interaction sur un changement d'état Vocal sur un utilisateur
-
-//Interaction tels que des commandes slashs
+//commandes slashs
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
   const command = interaction.client.commands.get(interaction.commandName);
@@ -105,38 +95,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
   return;
-  /**
-   * Handle slash command requests
-   * See https://discord.com/developers/docs/interactions/application-commands#slash-commands
-   */
-  if (type == InteractionType.APPLICATION_COMMAND) {
-    // "test" command
-    if (commandName === "test") {
-      // Send a message into the channel where command was triggered from
-      let resultat;
-      db.query(
-        `select * from user_level where user_id = ${interaction.user.id} and guild_id = ${interaction.guild.id}`,
-        (error, result) => {
-          resultat = result;
-          interaction.reply({
-            type: InteractionResponseType.DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE,
-            content: `hello world ${getRandomEmoji()} \n ${resultat}, ${
-              resultat.length
-            }`,
-            ephemeral: true,
-          });
-        }
-      );
-
-      db.query("select * from user_level", (error, result) => {
-        console.log(result);
-      });
-    }
-    //============================================================
-    // Commande 1 : genshin
-    if (commandName === "genshin") {
-    }
-  }
 });
 
 //Interaction au moment de la création d'un message
@@ -169,7 +127,18 @@ client.on(Events.MessageCreate, async (message) => {
               } pour être passé au niveau ${result[0].level + 1}`
             )
             .setDescription("")
-            .setImage(message.member.avatarURL);
+            .setImage(message.member.avatarURL)
+            .setTimestamp(true);
+          db.query(
+            `select * from guild_settings where guild_id = ${guild_id}`,
+            (error, result) => {
+              client.channels.cache
+                .find((channel) => {
+                  channel.id == result[0].level_channel;
+                })
+                .send({ embeds: [Embed] });
+            }
+          );
         }
       }
     }
@@ -179,9 +148,9 @@ client.on(Events.MessageCreate, async (message) => {
 // client.on(Events.VoiceStateUpdate, async (oldChannel, newChannel) => {
 // 	db.query(`insert into user_vocal (user_id, guild_id ,old_channel, new_channel, timestamp) values (${oldChannel.user.id}, ${oldChannel.member.guild.id}, ${oldChannel.channelId}, ${newChannel.channelId}, ${date.getTime()})`)
 // 	if ( newChannel.channelId === null) {
-// 		db.query(`select * from user_vocal where user_id = ${user_id} and guild_id = ${guild_id}`, (error, result) => {
-// 			db.query(`update user_level set vocal_time = vocal_time + ${result[1].timestamp - result[0].timestamp} where user_id = ${user_id} and guild_id = ${guild_id}`)
-// 			db.query(`update user_level set points = points + ${Math.floor((result[1].timestamp - result[0].timestamp)/1000)}  where user_id = ${user_id} and guild_id = ${guild_id}`)
+// 		db.query(`select * from user_vocal where user_id = ${user_id} and guild_id = ${guild_id} order by timestamp`, (error, result) => {
+// 			db.query(`update user_level set vocal_time = vocal_time + ${result[result.length-1].timestamp - result[0].timestamp} where user_id = ${user_id} and guild_id = ${guild_id}`)
+// 			db.query(`update user_level set points = points + ${Math.floor((result[result.length-1].timestamp - result[0].timestamp)/10000)}  where user_id = ${user_id} and guild_id = ${guild_id}`)
 // 		})
 // 	}
 // })
