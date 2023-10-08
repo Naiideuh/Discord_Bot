@@ -142,11 +142,12 @@ export async function execute(interaction) {
         break;
       case "armes":
         interaction.reply({
-          content: "Cette option n'est pasopérationnelle pour le moment",
+          content: "Cette option n'est pas opérationnelle pour le moment",
         });
         //executeWeapons(interaction);
         break;
       case "artefacts":
+        break;
     }
   } catch (e) {
     await interaction.editReply({
