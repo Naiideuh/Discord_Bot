@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { ActionRowBuilder, SlashCommandBuilder } from "discord.js";
 import fetch from "node-fetch";
 
 export const data = new SlashCommandBuilder()
@@ -14,8 +14,8 @@ export const data = new SlashCommandBuilder()
 export const category = "utils";
 
 export async function execute(interaction) {
-  console.log(interaction.options.pseudo);
-  const url = `https://rocket-league1.p.rapidapi.com/ranks/${interaction.options.pseudo}`;
+  console.log(interaction.options._hoistedOptions[0].value);
+  const url = `https://rocket-league1.p.rapidapi.com/ranks/${interaction.options._hoistedOptions[0].value}`;
   const options = {
     method: "GET",
     headers: {
@@ -27,11 +27,26 @@ export async function execute(interaction) {
   };
 
   try {
-    const response = await fetch(url, options);
-    const result = await response.text();
+    const result = await fetch(url, options);
+    //const result = await response.text();
     console.log(result);
+    if (typeof result != "string") return;
+    const buttons = new ActionRowBuilder();
+    const object = JSON.parse(result);
+    //const object = Object.assign({}, result);
+
+    for (let option of object)
+      buttons.addComponents(
+        new ButtonBuilder()
+          .setCustomId(option)
+          .setStyle("Secondary")
+          .setLabel(option)
+      );
   } catch (error) {
     console.error(error);
   }
-  interaction.reply({ content: `Option : ${interaction.options.pseudo}` });
+  interaction.reply({
+    content: `Option : ${interaction.options.pseudo}`,
+    components: [buttons],
+  });
 }

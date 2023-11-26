@@ -67,7 +67,7 @@ await (async () => {
     );
 
     console.log(
-      `[REFRESH ALL] Le rafraichissement de ${data.length} a réussi.`
+      `[REFRESH ALL] Le rafraichissement de ${data.length} applications a réussi.`
     );
   } catch (error) {
     // And of course, make sure you catch and log any errors!

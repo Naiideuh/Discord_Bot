@@ -88,7 +88,7 @@ const weaponsChoice = [
   },
   {
     name: "swords",
-    value: "swordss",
+    value: "swords",
   },
   {
     name: "catalysts",
@@ -141,10 +141,10 @@ export async function execute(interaction) {
         executeCharacter(interaction);
         break;
       case "armes":
-        interaction.reply({
-          content: "Cette option n'est pas opérationnelle pour le moment",
-        });
-        //executeWeapons(interaction);
+        // interaction.reply({
+        //   content: "Cette option n'est pas opérationnelle pour le moment",
+        // });
+        executeWeapons(interaction);
         break;
       case "artefacts":
         break;
@@ -255,6 +255,20 @@ async function executeWeapons(interaction) {
   const weaponsChoices = await fetchGenshinWeaponsType(
     interaction.options._hoistedOptions[0].value
   );
+
+  if ( weaponsChoices.length == 0 ) {
+    interaction.editReply({
+      content : "Pas d'élément correspondant, arrêt de la commande"
+    })
+    return 
+  }
+  console.log(weaponsChoices.length);
+
+  let pages = [];
+  for (let i = 0; i++; i < weaponsChoices.length / 25) {
+    pages[i] = weaponsChoices.slice(i * 25, (i + 1) * 25);
+    console.log(pages[i]);
+  }
 
   const row = new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
