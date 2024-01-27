@@ -13,7 +13,7 @@ const db = mysql.createConnection({
   port: 3306,
   user: "root",
   password: "",
-  database: "discordbot",
+  database: "discordbot_db",
 });
 
 export const data = new SlashCommandBuilder()
