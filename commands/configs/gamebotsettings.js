@@ -8,7 +8,7 @@ import {
 
 import mysql from "mysql";
 
-import db from "../../levels/MySQL.js";
+import { db } from "../../levels/MySQL.js";
 
 export const data = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)

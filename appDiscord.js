@@ -11,7 +11,7 @@ import {
   ChannelType,
 } from "discord.js";
 import "dotenv/config";
-import { database } from "./levels/MySQL.js";
+import { database, db } from "./levels/MySQL.js";
 import fs from "node:fs";
 
 const client = new Client({
