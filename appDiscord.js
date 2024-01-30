@@ -11,7 +11,7 @@ import {
   ChannelType,
 } from "discord.js";
 import "dotenv/config";
-import { database } from "./Niveaux/MySQL.js";
+import { database, db } from "./levels/MySQL.js";
 import fs from "node:fs";
 
 const client = new Client({
@@ -48,17 +48,9 @@ for (const folder of commandFolders) {
     });
   }
 }
-import mysql from "mysql";
-const db = mysql.createConnection({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: "",
-  database: "discordbot",
-});
-database("open");
 
 client.on("ready", () => {
+  database("open");
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
@@ -94,7 +86,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 client.on(Events.MessageCreate, async (message) => {
   const user_id = message.author.id;
   const guild_id = message.member.guild.id;
-  if (user_id == "373194336843595797") return; // Id du bot
+  if (message.author.bot == true) return;
   const A = 10;
   const EXP = 10;
   db.query(

@@ -13,7 +13,7 @@ export const data = new SlashCommandBuilder()
 export const category = "configs";
 
 export async function execute(interaction) {
-  if (interaction.member.id == "238282755119644672") {
+  if (interaction.member.id == process.env.DEVELOPPER_ID) {
     interaction.reply({
       content: `${eval(interaction.options._hoistedOptions)}`,
       ephemeral: true,
