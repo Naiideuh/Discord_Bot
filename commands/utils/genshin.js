@@ -18,7 +18,9 @@ async function fetchGenshinPersoChoices(element) {
   let personnagesChoix = [];
   await CommunityBuilds.getCharactersByElement(element)
     .then((arrayPersonnages) => {
+      console.log(arrayPersonnages.length);
       for (let GenshinCharacter of arrayPersonnages) {
+        console.log(GenshinCharacter.name);
         personnagesChoix.push(
           new StringSelectMenuOptionBuilder()
             .setLabel(capitalizeFirstLetter(GenshinCharacter.name))
@@ -29,6 +31,7 @@ async function fetchGenshinPersoChoices(element) {
     .catch((error) => {
       console.log(error);
     });
+  console.log({element, personnagesChoix});
   return personnagesChoix;
 }
 
@@ -170,6 +173,8 @@ async function executeCharacter(interaction) {
       .setPlaceholder("Personnage Genshin")
       .addOptions(...personnagesChoices)
   );
+
+  console.log(personnagesChoices);
 
   interaction.reply({
     content: "Choisis un personnage Genshin",

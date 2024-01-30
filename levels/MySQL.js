@@ -1,9 +1,10 @@
 import mysql from "mysql";
-const db = mysql.createConnection({
+export const db = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
   password: "",
+  port: '/var/run/mysqld/mysqld.sock',
   database: "discordbot_db",
 });
 

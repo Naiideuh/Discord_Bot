@@ -48,17 +48,9 @@ for (const folder of commandFolders) {
     });
   }
 }
-import mysql from "mysql";
-const db = mysql.createConnection({
-  host: "localhost",
-  port: 3306,
-  user: "root",
-  password: "",
-  database: "discordbot_db",
-});
-database("open");
 
 client.on("ready", () => {
+  database("open");
   console.log(`Logged in as ${client.user.tag}!`);
 });
 
