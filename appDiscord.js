@@ -149,7 +149,7 @@ client.on(Events.VoiceStateUpdate, async (oldChannel, newChannel) => {
       newChannel.channelId
     }, ${new Date().getTime()})`
   );
-  if (newChannel.channelId === null || afk_channel_id) {
+  if (newChannel.channelId === null || newChannel.channelId == afk_channel_id) {
     db.query(
       `select * from user_vocal where user_id = ${user_id} and guild_id = ${guild_id} order by timestamp`,
       (error, result) => {
