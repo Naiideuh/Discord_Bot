@@ -208,4 +208,4 @@ export async function execute(interaction) {
   });
 }
 
-export const category = 'utils'
+export const category = "utils";
