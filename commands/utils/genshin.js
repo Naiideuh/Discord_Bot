@@ -1,3 +1,4 @@
+/*
 import { CommunityBuilds } from "communitybuilds-node";
 import {
   ActionRowBuilder,
@@ -18,9 +19,7 @@ async function fetchGenshinPersoChoices(element) {
   let personnagesChoix = [];
   await CommunityBuilds.getCharactersByElement(element)
     .then((arrayPersonnages) => {
-      console.log(arrayPersonnages.length);
       for (let GenshinCharacter of arrayPersonnages) {
-        console.log(GenshinCharacter.name);
         personnagesChoix.push(
           new StringSelectMenuOptionBuilder()
             .setLabel(capitalizeFirstLetter(GenshinCharacter.name))
@@ -31,7 +30,6 @@ async function fetchGenshinPersoChoices(element) {
     .catch((error) => {
       console.log(error);
     });
-  console.log({element, personnagesChoix});
   return personnagesChoix;
 }
 
@@ -167,14 +165,20 @@ async function executeCharacter(interaction) {
     interaction.options._hoistedOptions[0].value
   );
 
+  if (personnagesChoices.length == 0) {
+    interaction.reply({
+      content: "Pas de personnages dans cette catégorie",
+      ephemeral: true,
+    });
+    return;
+  }
+
   const row = new ActionRowBuilder().addComponents(
     new StringSelectMenuBuilder()
       .setCustomId("personnage")
       .setPlaceholder("Personnage Genshin")
       .addOptions(...personnagesChoices)
   );
-
-  console.log(personnagesChoices);
 
   interaction.reply({
     content: "Choisis un personnage Genshin",
@@ -261,11 +265,11 @@ async function executeWeapons(interaction) {
     interaction.options._hoistedOptions[0].value
   );
 
-  if ( weaponsChoices.length == 0 ) {
+  if (weaponsChoices.length == 0) {
     interaction.editReply({
-      content : "Pas d'élément correspondant, arrêt de la commande"
-    })
-    return 
+      content: "Pas d'élément correspondant, arrêt de la commande",
+    });
+    return;
   }
   console.log(weaponsChoices.length);
 
@@ -329,3 +333,4 @@ async function executeWeapons(interaction) {
     });
   });
 }
+*/

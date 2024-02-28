@@ -1,18 +1,18 @@
 {
   "name": "getting-started",
   "version": "1.0.0",
-  "description": "Discord example app",
-  "main": "app.js",
+  "description": "Gamebot Discord Bot",
+  "main": "appDiscord.js",
   "type": "module",
   "engines": {
     "node": "16.x"
   },
   "scripts": {
-    "start": "node app.js",
-    "register": "node commands.js",
-    "dev": "nodemon app.js"
+    "start": "node appDiscord.js",
+    "register": "node deploy-commands.js",
+    "dev": "nodemon appDiscord.js"
   },
-  "author": "Shay DeWael",
+  "author": "Arnaud Lefebvre",
   "license": "MIT",
   "dependencies": {
     "communitybuilds-node": "^2.0.13",
@@ -22,6 +22,7 @@
     "express": "^4.18.2",
     "mongodb": "^5.4.0",
     "mysql": "^2.18.1",
+    "mysql2": "^3.9.1",
     "node-fetch": "^3.3.2",
     "quickchart-js": "^3.1.2"
   },

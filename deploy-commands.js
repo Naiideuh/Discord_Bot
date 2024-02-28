@@ -37,6 +37,16 @@ await (async () => {
     console.log(
       `[REFRESH ALL] Le rafraichissement de  ${commands.length} application (/) a commencé.`
     );
+    // for global commands
+    await rest
+      .put(Routes.applicationCommands(process.env.APP_ID), { body: [] })
+      .then(() =>
+        console.log(
+          `[REFRESH ALL] Suppression de toutes les commandes déployées terminée`
+        )
+      )
+      .catch(console.error);
+
     // The put method is used to fully refresh all commands in the guild with the current set
     const data = await rest.put(
       Routes.applicationCommands(process.env.APP_ID),
@@ -50,4 +60,5 @@ await (async () => {
     // And of course, make sure you catch and log any errors!
     console.error(error);
   }
+  return;
 })();

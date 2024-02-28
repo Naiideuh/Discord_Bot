@@ -6,9 +6,7 @@ import {
   SlashCommandSubcommandBuilder,
 } from "discord.js";
 
-import mysql from "mysql";
-
-import { db } from "../../levels/MySQL.js";
+import { discordbot_Database } from "../../utils/database/MySQL.js";
 
 export const data = new SlashCommandBuilder()
   .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
@@ -43,6 +41,20 @@ export const data = new SlashCommandBuilder()
       .setDescription(
         "Choisis le channel défini pour créer des channels vocaux privés"
       )
+  )
+  .addSubcommand((guild_activity_channel) =>
+    guild_activity_channel
+      .setName("guildactivitychannel")
+      .addChannelOption((channel) =>
+        channel
+          .setName("channel")
+          .setRequired(true)
+          .setDescription("Channel pour afficher l'activité de la guilde")
+          .addChannelTypes(ChannelType.GuildText)
+      )
+      .setDescription(
+        "Choisis le channel défini pour afficher l'activité de la guilde"
+      )
   );
 
 export async function execute(interaction) {
@@ -52,6 +64,9 @@ export async function execute(interaction) {
       break;
     case "voicechannelgenerator":
       executeVoiceChannelGenerator(interaction);
+      break;
+    case "guildactivitychannel":
+      executeGuildActivityChannel(interaction);
       break;
     default:
       interaction.reply({
@@ -65,24 +80,22 @@ export async function execute(interaction) {
 export const category = "configs";
 
 async function executeLevelChannel(interaction) {
+  var SQLDatabase = new discordbot_Database();
   try {
-    db.query(
-      `select * from guild_settings where guild_id = ${interaction.member.guild.id}`,
-      (error, result) => {
-        if (result.length == 0) {
-          db.query(
-            `insert into guild_settings (guild_id) value (${interaction.member.guild.id})`
-          );
-        }
-
-        db.query(
-          `update guild_settings set level_channel = ${interaction.options._hoistedOptions[0].channel.id} where guild_id = ${interaction.member.guild.id}`
-        );
-      }
+    let guildSettings = (
+      await SQLDatabase.getGuildSettings(interaction.member.guild.id)
+    )[0][0];
+    if (!guildSettings) {
+      SQLDatabase.createGuildSettingsRow(interaction.member.guild.id);
+    }
+    console.log(interaction.options._hoistedOptions[0].channel);
+    await SQLDatabase.updateGuildSettingsLevelChannel(
+      interaction.options._hoistedOptions[0].channel.id,
+      interaction.member.guild.id
     );
   } catch (e) {
     console.log(
-      `[SETTINGS] Erreur pendant le changement de level_channel pour la guilde ${interaction.member.guild.id}`
+      `[GAMEBOT_SETTINGS] Erreur pendant le changement de level_channel pour la guilde ${interaction.member.guild.id}`
     );
   } finally {
     interaction.reply({
@@ -93,23 +106,47 @@ async function executeLevelChannel(interaction) {
 }
 
 async function executeVoiceChannelGenerator(interaction) {
+  var SQLDatabase = new discordbot_Database();
   try {
-    db.query(
-      `select * from guild_settings where guild_id = ${interaction.member.guild.id}`,
-      (error, result) => {
-        if (result.length == 0) {
-          db.query(
-            `insert into guild_settings (guild_id) value (${interaction.member.guild.id})`
-          );
-        }
-        db.query(
-          `update guild_settings set voiceChannel_generator = ${interaction.options._hoistedOptions[0].channel.id} where guild_id = ${interaction.member.guild.id}`
-        );
-      }
+    let guildSettings = (
+      await SQLDatabase.getGuildSettings(interaction.member.guild.id)
+    )[0][0];
+    if (!guildSettings) {
+      SQLDatabase.createGuildSettingsRow(interaction.member.guild.id);
+    }
+    await SQLDatabase.updateGuildSettingsVoiceChannelGenerator(
+      interaction.options._hoistedOptions[0].channel.id,
+      interaction.member.guild.id
     );
   } catch (e) {
     console.log(
-      `[SETTINGS] Erreur pendant le changement de voiceChannel_generator pour la guilde ${interaction.member.guild.id}\n${e}`
+      `[GAMEBOT_SETTINGS] Erreur pendant le changement de voiceChannel_generator pour la guilde ${interaction.member.guild.id}`
+    );
+  } finally {
+    interaction.reply({
+      content: `Settings appliqué`,
+      ephemeral: true,
+    });
+  }
+}
+
+async function executeGuildActivityChannel(interaction) {
+  var SQLDatabase = new discordbot_Database();
+  try {
+    let guildSettings = (
+      await SQLDatabase.getGuildSettings(interaction.member.guild.id)
+    )[0][0];
+    if (!guildSettings) {
+      SQLDatabase.createGuildSettingsRow(interaction.member.guild.id);
+    }
+    console.log(interaction.options._hoistedOptions[0].channel);
+    await SQLDatabase.updateGuildSettingsGuildActivityChannel(
+      interaction.options._hoistedOptions[0].channel.id,
+      interaction.member.guild.id
+    );
+  } catch (e) {
+    console.log(
+      `[GAMEBOT_SETTINGS] Erreur pendant le changement de guildd_activity_channel pour la guilde ${interaction.member.guild.id}`
     );
   } finally {
     interaction.reply({
