@@ -38,21 +38,6 @@ export class discordbot_Database {
     }
   }
 
-  async askForQuery(query) {
-    this.db.promise().query(query);
-  }
-
-  async askForDataRows(query) {
-    console.log(`Test askForDataRows ${query}`);
-    let res, err;
-    this.db.query(query, async (error, result) => {
-      err = error;
-      res = result;
-      console.log(result);
-      console.log(error);
-    });
-  }
-
   async isUserCreated(userId, guildId) {
     let userDatas = (await this.getUserById(userId, guildId))[0][0];
     if (!userDatas) {
@@ -64,7 +49,7 @@ export class discordbot_Database {
 
   async verifyUserRowExistence(userId, guildId) {
     if (!(await this.isUserCreated(userId, guildId))) {
-      await SQLDatabase.createUserLevelDataRow(userId, guildId);
+      await this.createUserLevelDataRow(userId, guildId);
       console.log(
         "[MESSAGE] Création de la ligne correspondante : ",
         userId,
@@ -183,9 +168,74 @@ export class discordbot_Database {
       );
   }
 
+  async updateGuildSettingsGuildActivityChannel(guildActivityChannel, guildId) {
+    this.db
+      .promise()
+      .query(
+        `update guild_settings set activity_channel = ${guildActivityChannel} where guild_id = ${guildId}`
+      );
+  }
+
   async getGuildSettingsVoiceChannelGenerator(guildId) {
     return await this.db
       .promise()
       .query(`select * from guild_settings where guild_id = ${guildId}`);
+  }
+}
+
+export class GuildMessagesByChannelDatabase extends discordbot_Database {
+  async getChannelById(guildId, channelId) {
+    return await this.db
+      .promise()
+      .query(
+        `select * from guild_messages_by_channel where guild_id = ${guildId} and channel_id = ${channelId}`
+      );
+  }
+
+  async getChannelsByGuildIdOrderByNumber(guildId) {
+    return await this.db
+      .promise()
+      .query(
+        `select * from guild_messages_by_channel where guild_id = ${guildId}`
+      );
+  }
+
+  async isChannelCreated(guildId, channelId) {
+    let channelDatas = (await this.getChannelById(guildId, channelId))[0][0];
+    if (!channelDatas) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  async createChannelDataRow(guildId, channelId) {
+    await this.db
+      .promise()
+      .query(
+        `insert into guild_messages_by_channel (guild_id, channel_id) value (${guildId}, ${channelId})`
+      );
+  }
+
+  async verifyChannelRowExistence(guildId, channelId) {
+    if (!(await this.isChannelCreated(guildId, channelId))) {
+      await this.createChannelDataRow(guildId, channelId);
+    }
+  }
+
+  async addMessageToChannelDatabase(guildId, channelId) {
+    await this.db
+      .promise()
+      .query(
+        `update guild_messages_by_channel set nbr_messages = nbr_messages + 1 where channel_id = ${channelId} and guild_id = ${guildId}`
+      );
+  }
+
+  async deleteGuildChannels(guildId) {
+    await this.db
+      .promise()
+      .query(
+        `delete from guild_messages_by_channel where guild_id = ${guildId}`
+      );
   }
 }

@@ -17,7 +17,7 @@ export async function execute(message) {
 
   await SQLDatabase.verifyUserRowExistence(user_id, guild_id);
   console.log("[LEVEL_SYSTEM] Augmentation des points du user : ", user_id);
-  await SQLDatabase.increaseUserPoints(user_id, guild_id);
+  await SQLDatabase.increaseUserPoints(user_id, guild_id, 1);
   if (userDatas.points + 1 >= A * EXP ** userDatas.level) {
     console.log("[LEVEL_SYSTEM] Augmentation du niveau du user : ", user_id);
     await SQLDatabase.increaseUserLevel(user_id, guild_id);

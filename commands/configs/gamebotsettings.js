@@ -41,6 +41,20 @@ export const data = new SlashCommandBuilder()
       .setDescription(
         "Choisis le channel défini pour créer des channels vocaux privés"
       )
+  )
+  .addSubcommand((guild_activity_channel) =>
+    guild_activity_channel
+      .setName("guildactivitychannel")
+      .addChannelOption((channel) =>
+        channel
+          .setName("channel")
+          .setRequired(true)
+          .setDescription("Channel pour afficher l'activité de la guilde")
+          .addChannelTypes(ChannelType.GuildText)
+      )
+      .setDescription(
+        "Choisis le channel défini pour afficher l'activité de la guilde"
+      )
   );
 
 export async function execute(interaction) {
@@ -50,6 +64,9 @@ export async function execute(interaction) {
       break;
     case "voicechannelgenerator":
       executeVoiceChannelGenerator(interaction);
+      break;
+    case "guildactivitychannel":
+      executeGuildActivityChannel(interaction);
       break;
     default:
       interaction.reply({
@@ -104,6 +121,32 @@ async function executeVoiceChannelGenerator(interaction) {
   } catch (e) {
     console.log(
       `[GAMEBOT_SETTINGS] Erreur pendant le changement de voiceChannel_generator pour la guilde ${interaction.member.guild.id}`
+    );
+  } finally {
+    interaction.reply({
+      content: `Settings appliqué`,
+      ephemeral: true,
+    });
+  }
+}
+
+async function executeGuildActivityChannel(interaction) {
+  var SQLDatabase = new discordbot_Database();
+  try {
+    let guildSettings = (
+      await SQLDatabase.getGuildSettings(interaction.member.guild.id)
+    )[0][0];
+    if (!guildSettings) {
+      SQLDatabase.createGuildSettingsRow(interaction.member.guild.id);
+    }
+    console.log(interaction.options._hoistedOptions[0].channel);
+    await SQLDatabase.updateGuildSettingsGuildActivityChannel(
+      interaction.options._hoistedOptions[0].channel.id,
+      interaction.member.guild.id
+    );
+  } catch (e) {
+    console.log(
+      `[GAMEBOT_SETTINGS] Erreur pendant le changement de guildd_activity_channel pour la guilde ${interaction.member.guild.id}`
     );
   } finally {
     interaction.reply({
