@@ -196,7 +196,7 @@ export class GuildMessagesByChannelDatabase extends discordbot_Database {
     return await this.db
       .promise()
       .query(
-        `select * from guild_messages_by_channel where guild_id = ${guildId}`
+        `select * from guild_messages_by_channel where guild_id = ${guildId} order by nbr_messages desc`
       );
   }
 
