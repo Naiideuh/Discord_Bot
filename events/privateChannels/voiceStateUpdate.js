@@ -1,15 +1,15 @@
 import { Events, ChannelType } from "discord.js";
-import { discordbot_Database } from "../../utils/database/MySQL.js";
+import { GuildSettingsDatabase } from "../../utils/database/MySQL.js";
 
 export const name = Events.VoiceStateUpdate;
 
 export const once = false;
 
 export async function execute(oldChannel, newChannel) {
-  var SQLDatabase = new discordbot_Database();
-  let guildSettings = (
-    await SQLDatabase.getGuildSettingsVoiceChannelGenerator(oldChannel.guild.id)
-  )[0][0];
+  var guildSettingsDatabase = new GuildSettingsDatabase();
+  let guildSettings = await guildSettingsDatabase.getGuildSettings(
+    oldChannel.guild.id
+  );
   if (!guildSettings) return;
   if (
     newChannel.channelId != guildSettings.voiceChannel_generator ||

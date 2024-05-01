@@ -1,4 +1,5 @@
 import mysql from "mysql2";
+import { Logger } from "../logger.js";
 
 let dbPath = "";
 let os = "Unknown OS";
@@ -14,97 +15,12 @@ export class discordbot_Database {
       password: "",
       port: dbPath,
       database: "discordbot_db",
+      supportBigNumbers: true,
     });
   }
+}
 
-  async database(action) {
-    console.log("[MYSQL] Connexion à MySQL");
-    if (action == "open") {
-      this.db.connect((error) => {
-        if (error) {
-          console.log(
-            "Erreur au moment de la connexion avec la Database MySQL"
-          );
-          console.log(error);
-          return;
-        }
-        console.log("[MYSQL] Connexion établie");
-        return;
-      });
-    } else if (action == "close") {
-      this.db.end((error) => {});
-      console.log("[MYSQL] Connexion fermée");
-      return;
-    }
-  }
-
-  async isUserCreated(userId, guildId) {
-    let userDatas = (await this.getUserById(userId, guildId))[0][0];
-    if (!userDatas) {
-      return false;
-    } else {
-      return true;
-    }
-  }
-
-  async verifyUserRowExistence(userId, guildId) {
-    if (!(await this.isUserCreated(userId, guildId))) {
-      await this.createUserLevelDataRow(userId, guildId);
-      console.log(
-        "[MESSAGE] Création de la ligne correspondante : ",
-        userId,
-        ", guild_id : ",
-        guildId
-      );
-    }
-  }
-
-  async getUserById(userId, guildId) {
-    return await this.db
-      .promise()
-      .query(
-        `select * from user_level where user_id = "${userId}" and guild_id = "${guildId}";`
-      );
-  }
-
-  async createUserLevelDataRow(userId, guildId) {
-    this.db
-      .promise()
-      .query(
-        `insert into user_level (user_id, guild_id, level, points)  values (${userId}, ${guildId}, 1, 0)`
-      );
-  }
-
-  async increaseUserPoints(userId, guildId) {
-    this.db
-      .promise()
-      .query(
-        `update user_level set points = points + 1 where user_id = ${userId} and guild_id = ${guildId}`
-      );
-  }
-
-  async increaseUserPoints(userId, guildId, points) {
-    this.db
-      .promise()
-      .query(
-        `update user_level set points = points + ${points} where user_id = ${userId} and guild_id = ${guildId}`
-      );
-  }
-
-  async increaseUserLevel(userId, guildId) {
-    this.db
-      .promise()
-      .query(
-        `update user_level set level = level + 1 where user_id = ${userId} and guild_id = ${guildId}`
-      );
-  }
-
-  async getGuildSettings(guildId) {
-    return await this.db
-      .promise()
-      .query(`select * from guild_settings where guild_id = ${guildId}`);
-  }
-
+export class VoiceTimeDataBase extends discordbot_Database {
   async addVoiceDataRow(userId, guildId, oldChannel, newChannel) {
     this.db
       .promise()
@@ -114,11 +30,13 @@ export class discordbot_Database {
   }
 
   async getUserVoiceDataRows(userId, guildId) {
-    return await this.db
-      .promise()
-      .query(
-        `select * from user_vocal where user_id = ${userId} and guild_id = ${guildId} order by timestamp`
-      );
+    return (
+      await this.db
+        .promise()
+        .query(
+          `select * from user_vocal where user_id = ${userId} and guild_id = ${guildId} order by timestamp`
+        )
+    )[0];
   }
 
   async increaseVoiceTime(userId, guildId, time) {
@@ -136,17 +54,21 @@ export class discordbot_Database {
         `delete from user_vocal where user_id = ${userId} and guild_id = ${guildId}`
       );
   }
+}
 
-  async getGuildSettings(guildId) {
-    return await this.db
-      .promise()
-      .query(`select * from guild_settings where guild_id = ${guildId}`);
-  }
-
+export class GuildSettingsDatabase extends discordbot_Database {
   async createGuildSettingsRow(guildId) {
     this.db
       .promise()
       .query(`insert into guild_settings (guild_id) value (${guildId})`);
+  }
+
+  async getGuildSettings(guildId) {
+    return (
+      await this.db
+        .promise()
+        .query(`select * from guild_settings where guild_id = ${guildId}`)
+    )[0][0];
   }
 
   async updateGuildSettingsLevelChannel(levelChannel, guildId) {
@@ -176,10 +98,86 @@ export class discordbot_Database {
       );
   }
 
-  async getGuildSettingsVoiceChannelGenerator(guildId) {
+  async updateGuildSettingsFormula(formula, guildId) {
+    this.db
+      .promise()
+      .query(
+        `update guild_settings set formula = '${formula}' where guild_id = ${guildId}`
+      );
+  }
+}
+
+export class LevelSystemDatabase extends discordbot_Database {
+  async isUserCreated(userId, guildId) {
+    let userDatas = await this.getUserById(userId, guildId);
+    if (!userDatas) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  async verifyUserRowExistence(userId, guildId) {
+    if (!(await this.isUserCreated(userId, guildId))) {
+      await this.createUserLevelDataRow(userId, guildId);
+    }
+  }
+
+  async getUserById(userId, guildId) {
+    return (
+      await this.db
+        .promise()
+        .query(
+          `select * from user_level where user_id = "${userId}" and guild_id = "${guildId}";`
+        )
+    )[0][0];
+  }
+
+  async getUsers(guildId) {
     return await this.db
       .promise()
-      .query(`select * from guild_settings where guild_id = ${guildId}`);
+      .query(`select * from user_level where guild_id = "${guildId}";`);
+  }
+
+  async createUserLevelDataRow(userId, guildId) {
+    Logger.info(
+      `Création de la ligne du user : ${userId} de la guilde : ${guildId}`
+    );
+    this.db
+      .promise()
+      .query(
+        `insert into user_level (user_id, guild_id, level, points)  values (${userId}, ${guildId}, 1, 0)`
+      );
+  }
+
+  async increaseUserPoints(userId, guildId, points) {
+    Logger.info(
+      `Augmentation des points du user : ${userId} de la guilde : ${guildId} de ${points} points`
+    );
+    this.db
+      .promise()
+      .query(
+        `update user_level set points = points + ${points} where user_id = ${userId} and guild_id = ${guildId}`
+      );
+  }
+
+  async increaseUserLevel(userId, guildId) {
+    Logger.info(
+      `Augmentation du niveau du user : ${userId} de la guilde : ${guildId}`
+    );
+    this.db
+      .promise()
+      .query(
+        `update user_level set level = level + 1 where user_id = ${userId} and guild_id = ${guildId}`
+      );
+  }
+
+  async setUserLevel(userId, guildId, level) {
+    this.db
+      .promise()
+      .query(
+        `update user_level set level = ${level} where user_id = ${userId} and guild_id = ${guildId}`
+      );
   }
 }
 
@@ -193,11 +191,13 @@ export class GuildMessagesByChannelDatabase extends discordbot_Database {
   }
 
   async getChannelsByGuildIdOrderByNumber(guildId) {
-    return await this.db
-      .promise()
-      .query(
-        `select * from guild_messages_by_channel where guild_id = ${guildId} order by nbr_messages desc`
-      );
+    return (
+      await this.db
+        .promise()
+        .query(
+          `select * from guild_messages_by_channel where guild_id = ${guildId} order by nbr_messages desc`
+        )
+    )[0];
   }
 
   async isChannelCreated(guildId, channelId) {
